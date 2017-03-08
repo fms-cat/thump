@@ -1,0 +1,21 @@
+pi $t, si 0
+
+@update
+pi $i, si 0
+
+@loop
+pi $x, si 0
+pi $y, s $i
+pi $z, si 8
+pi $l, si 256
+pi $__, si 5, pi $_, s $t, pi $c, s $t, mul $__, add $i, mul $_, sin $c
+x $x, y $y, z $z, s $c, sf $l
+
+zi 4, cp $z
+pi $_, si 1, pi $i, add $_
+pi $$_, si 6, pi $_, si 256, pi $i, sne $_, jf $$_, #j @loop
+
+pi $_, si 1, pi $t, add $_
+pi $$_, si 10, w $$_
+
+#j @update

@@ -1,0 +1,12 @@
+$side-left: 2em;
+$side-width: 12em;
+
+$content-left: $side-left + $side-width + 4em;
+$content-width: 32em;
+
+$vsep-width: 4em;
+
+$color-bg: #fff;
+$color-fg: #222;
+
+@import 'general';

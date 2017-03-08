@@ -1,0 +1,12 @@
+@charset "UTF-8";
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  color: #222;
+  font: 200 16px/1.5 "Helvetica Neue", "ヒラギノ角ゴシック", sans-serif; }
+
+canvas {
+  image-rendering: pixelated; }

@@ -1,0 +1,13 @@
+pi $ic, si 0
+
+@loop
+
+// cat forward
+pi $_, si 16, pi $x, s $i, mul $_
+pi $_, si 16, pi $y, s $i, div $_, mul $_
+pi $_, si 13, spt $_ // set sprite table
+x $x, y $y, zi 4, spa $i // draw sprite
+
+pi $_, si 1, pi $i, add $_
+pi $$_, si 2, w $$_
+#j @loop

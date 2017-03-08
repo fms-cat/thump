@@ -1,0 +1,14 @@
+pi $i, si 0
+
+@beg
+pi $x, si 0
+pi $z, si 8
+pi $l, si 256
+pi $c, s $i
+x $x, y $i, z $z, s $c, sf $l
+
+zi 4, cp8 $z
+pi $_, si 1, pi $i, add $_
+pi $$_, si 10, w $$_
+
+#j @beg
