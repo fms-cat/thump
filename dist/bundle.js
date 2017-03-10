@@ -31,15 +31,63 @@ var _thump2 = _interopRequireDefault(_thump);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var thump = new _thump2.default();
+var thump = new _thump2.default(document.getElementById("canvas"));
 
-thump.run("\n#l 2 8 img/msgothic_16x16pn.png\n#l 2 13 img/cat_big.png\n#l 1 12 img/cat_small.png\n\n@start\npi $_, si 0, rns $_\n// pi $_, si 11, zi 4, cp $_\n// pi $_, si 8, gzr $_\n\n@loopB\n// pi $i, si 0\n\n@loopS\n\n// func poker\npi $_, si 0, pi $x, rnd $_\npi $_, si 16, pi $y, rnd $_\npi $_, si 2, pi $z, rnd $_\npi $_, si 0, pi $v, rnd $_\nx $x, y $y, z $z, s $v // poke\n\n// cat, word and line\npi $_, si 16, pi $x, s $i, mul $_\npi $_, si 16, pi $y, s $i, div $_, mul $_\npi $_, si 3, pi $__, si 4, pi $z, rnd $_, add $__\npi $_, si 0, pi $v, rnd $_\npi $_, si 32, pi $l, rnd $_\npi $_, si 64, pi $__, si 166, pi $spr, rnd $_, add $__\npi $_, si 13, spt $_ // set sprite table (cat)\nx $x, y $y, zi 4, sp8 $spr // draw sprite\npi $_, si 8, spt $_ // set sprite table (word)\nx $x, y $y, z $z, sp $spr // draw sprite\nx $x, y $y, z $z, s $v, sf $l // draw line\n\n// another looper\npi $ic, si 0\n\n@loopCS\n\n// cat forward\npi $_, si 16, pi $x, s $ic, mul $_, add $i\npi $_, si 16, pi $y, s $ic, div $_, mul $_\npi $_, si 12, spt $_ // set sprite table\nx $x, y $y, zi 17, sp $ic // draw sprite\n\npi $_, si 1, pi $ic, add $_\npi $_, si 256, pi $ic, seq $_, j @loopCS\n\npi $_, si 17, zi 4, cp8 $_\n\npi $_, si 2, w $_\n\npi $_, si 1, pi $i, add $_\npi $_, si 256, pi $i, seq $_, j @loopS\n\nj @loopB\n");
+textareaCode.value = "pi $x, si 0 // $x = 0\npi $y, si 0 // $y = 0\npi $0, si 0 // $0 = 0\npi $1, si 1 // $1 = 1\n\n@loop\npi $c, si 0, rnd $c // $c = random()\nx $x, y $y, zi 4, s $c // set $c to ($x, $y, 4 (=red buffer))\n\npi $x, add $1 // $x += 1\npi $x, seq $0, j @loop // if x != 0 then jump to @loop\n\npi $_, si 10, w $_ // wait for 10ms\n\npi $y, add $1 // $y += 1\nj @loop // jump to @loop\n";
 
-buttonGood.addEventListener("click", function () {
-  thump.stop();
+thump.run(textareaCode.value);
+
+// ------
+
+thump.setLogFunc(function (num) {
+  if (15 === divConsole.childElementCount) {
+    divConsole.removeChild(divConsole.firstChild);
+  }
+
+  var d = document.createElement("div");
+  d.classList.add("divLog");
+  d.innerText = num;
+  divConsole.appendChild(d);
+});
+
+// ------
+
+var escListener = function escListener(event) {
+  if (event.which === 27) {
+    thump.stop();
+  }
+};
+window.addEventListener("keydown", escListener);
+
+// ------
+
+buttonRun.addEventListener("click", function () {
+  while (0 !== divConsole.childElementCount) {
+    divConsole.removeChild(divConsole.firstChild);
+  }
+
+  thump.run(textareaCode.value);
+  thump.init();
+  thump.saveFrameMax = 0;
+});
+
+buttonRedice.addEventListener("click", function () {
+  while (0 !== divConsole.childElementCount) {
+    divConsole.removeChild(divConsole.firstChild);
+  }
+
   thump.redice();
   thump.init();
-  // thump.saveMode = true;
+  thump.saveFrameMax = 0;
+});
+
+buttonSave.addEventListener("click", function () {
+  while (0 !== divConsole.childElementCount) {
+    divConsole.removeChild(divConsole.firstChild);
+  }
+
+  thump.init();
+  thump.saveFrameMax = 300;
 });
 
 },{"./thump":"/Users/Yutaka/Dropbox/pro/JavaScript/thump/src/script/thump.js"}],"/Users/Yutaka/Dropbox/pro/JavaScript/thump/src/script/palette256.js":[function(require,module,exports){
@@ -115,7 +163,12 @@ exports.default = function (Thump, thump) {
 
   thump.def("l", function (param) {
     // console log pointer
-    console.log(thump.get(param));
+    thump.log(thump.get(param));
+  });
+
+  thump.def("lc", function (param) {
+    // console log pointer (char)
+    thump.log(String.fromCharCode(thump.get(param)));
   });
 
   thump.def("li", function (param) {
@@ -311,6 +364,21 @@ exports.default = function (Thump, thump) {
     }
   });
 
+  thump.def("srt", function (param) {
+    // sort
+    var index = ~~(thump.pointer() / 256) * 256;
+    for (var ii = 0; ii < thump.get(param); ii++) {
+      for (var i = 0; i < 255; i++) {
+        var a = thump.buf[index + i];
+        var b = thump.buf[index + i + 1];
+        if (b < a) {
+          thump.buf[index + i + 1] = a;
+          thump.buf[index + i] = b;
+        }
+      }
+    }
+  });
+
   thump.def("gzr", function (param) {
     // set gzr
     thump.set(Thump.P_GZR, thump.get(param));
@@ -329,6 +397,34 @@ exports.default = function (Thump, thump) {
   thump.def("spt", function (param) {
     // set sprite table
     thump.set(Thump.P_SPR, thump.get(param));
+  });
+
+  thump.def("jpg", function (param) {
+    // jpegize!!
+    thump.stopped = true;
+    var z = thump.get(Thump.P_Z);
+    var d = thump.bgContext.getImageData(0, 0, 256, 256);
+    for (var _i = 0; _i < 65536; _i++) {
+      d.data[_i * 4 + 0] = thump.get(z * 65536 + _i);
+      d.data[_i * 4 + 1] = thump.get((z + 1) * 65536 + _i);
+      d.data[_i * 4 + 2] = thump.get((z + 2) * 65536 + _i);
+      d.data[_i * 4 + 3] = 255;
+    }
+    thump.bgContext.putImageData(d, 0, 0);
+    var url = thump.bgCanvas.toDataURL("image/jpeg", thump.get(param) / 256.0);
+    var i = new Image();
+    i.onload = function () {
+      thump.bgContext.fillRect(0, 0, 256, 256);
+      thump.bgContext.drawImage(i, 0, 0);
+      var d = thump.bgContext.getImageData(0, 0, 256, 256);
+      for (var _i2 = 0; _i2 < 65536; _i2++) {
+        thump.set(z * 65536 + _i2, d.data[_i2 * 4 + 0]);
+        thump.set((z + 1) * 65536 + _i2, d.data[_i2 * 4 + 1]);
+        thump.set((z + 2) * 65536 + _i2, d.data[_i2 * 4 + 2]);
+      }
+      thump.stopped = false;
+    };
+    i.src = url;
   });
 };
 
@@ -358,7 +454,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Thump = function () {
-  function Thump() {
+  function Thump(_canvas) {
     _classCallCheck(this, Thump);
 
     var thump = this;
@@ -375,7 +471,7 @@ var Thump = function () {
 
     // ------
 
-    thump.canvas = document.getElementById("canvas");
+    thump.canvas = _canvas;
     thump.canvas.width = 256;
     thump.canvas.height = 256;
 
@@ -383,6 +479,14 @@ var Thump = function () {
     thump.context.fillStyle = "#000";
     thump.context.fillRect(0, 0, 256, 256);
     thump.imageData = thump.context.getImageData(0, 0, 256, 256);
+
+    // ------
+
+    thump.bgCanvas = document.createElement("canvas");
+    thump.bgCanvas.width = 256;
+    thump.bgCanvas.height = 256;
+
+    thump.bgContext = thump.bgCanvas.getContext("2d");
 
     // ------
 
@@ -405,17 +509,7 @@ var Thump = function () {
 
     thump.update();
 
-    // ------
-
-    var escListener = function escListener(event) {
-      if (event.which === 27) {
-        thump.stopped = true;
-      }
-    };
-    window.addEventListener("keydown", escListener);
-
     window.addEventListener("unload", function () {
-      window.removeEventListener("keydown", escListener);
       delete thump.buf;
       thump = null;
     });
@@ -468,13 +562,13 @@ var Thump = function () {
     key: "save",
     value: function save() {
       var thump = this;
-      if (thump.saveFrameCount === 0 || thump.saveFrameMax < thump.saveFrameCount) {
+      thump.saveFrameCount++;
+      if (thump.saveFrameMax < thump.saveFrameCount) {
         return;
       }
       thump.saveAnchor.href = thump.canvas.toDataURL();
       thump.saveAnchor.download = ("0000" + thump.saveFrameCount).slice(-5) + ".png";
       thump.saveAnchor.click();
-      thump.saveFrameCount++;
     }
   }, {
     key: "draw",
@@ -499,14 +593,25 @@ var Thump = function () {
       });
     }
   }, {
+    key: "log",
+    value: function log(num) {
+      console.log(num);
+    }
+  }, {
+    key: "setLogFunc",
+    value: function setLogFunc(func) {
+      var thump = this;
+      thump.log = func;
+    }
+  }, {
     key: "loadBuffer",
     value: function loadBuffer(url, loc, mode, callback) {
       var thump = this;
       var image = new Image();
       image.onload = function () {
-        thump.context.clearRect(0, 0, 256, 256);
-        thump.context.drawImage(image, 0, 0, 256, 256);
-        var data = thump.context.getImageData(0, 0, 256, 256);
+        thump.bgContext.clearRect(0, 0, 256, 256);
+        thump.bgContext.drawImage(image, 0, 0, 256, 256);
+        var data = thump.bgContext.getImageData(0, 0, 256, 256);
 
         if (mode === 0) {
           for (var i = 0; i < 65536; i++) {
@@ -622,18 +727,24 @@ var Thump = function () {
         addPrg(prg[0], prg[1]);
       });
 
-      var loadRemain = loads.length;
-      var loadDone = function loadDone() {
-        loadRemain--;
-        if (loadRemain === 0) {
-          if (typeof callback === "function") {
-            callback();
-          }
+      if (loads.length === 0) {
+        if (typeof callback === "function") {
+          callback();
         }
-      };
-      loads.map(function (load) {
-        thump.loadBuffer(load[2], load[1], load[0], loadDone);
-      });
+      } else {
+        var loadRemain = loads.length;
+        var loadDone = function loadDone() {
+          loadRemain--;
+          if (loadRemain === 0) {
+            if (typeof callback === "function") {
+              callback();
+            }
+          }
+        };
+        loads.map(function (load) {
+          thump.loadBuffer(load[2], load[1], load[0], loadDone);
+        });
+      }
     }
   }, {
     key: "redice",

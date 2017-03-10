@@ -1,13 +1,14 @@
-pi $ic, si 0
+#l 2 8 img/cat_big.png // load "img/cat_big.png" to z=(8,9,10,11) as mode 2 (= 32bit color mode)
+
+pi $i, si 0 // $i = 0
+pi $16, si 16 // $16 = 16
 
 @loop
+pi $x, s $i, mul $16 // $x = i * 16
+pi $y, s $i, div $16, mul $16 // $y = i / 16 * 16
+pi $_, si 8, spt $_ // set sprite table to z=8
+x $x, y $y, zi 4, spa $i // draw 32bit color sprite to ($x, $y, 4(,5,6,7) (= rgba buffer))
 
-// cat forward
-pi $_, si 16, pi $x, s $i, mul $_
-pi $_, si 16, pi $y, s $i, div $_, mul $_
-pi $_, si 13, spt $_ // set sprite table
-x $x, y $y, zi 4, spa $i // draw sprite
-
-pi $_, si 1, pi $i, add $_
-pi $$_, si 2, w $$_
-#j @loop
+pi $_, si 1, pi $i, add $_ // $i += 1
+pi $_, si 10, w $_ // wait for 10ms
+j @loop // jump tp @loop

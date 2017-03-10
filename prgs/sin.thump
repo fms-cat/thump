@@ -1,21 +1,17 @@
-pi $t, si 0
+pi $t, si 0 // $t = 0
 
 @update
-pi $i, si 0
+pi $i, si 0 // $i = 0
 
 @loop
-pi $x, si 0
-pi $y, s $i
-pi $z, si 8
-pi $l, si 256
-pi $__, si 5, pi $_, s $t, pi $c, s $t, mul $__, add $i, mul $_, sin $c
-x $x, y $y, z $z, s $c, sf $l
+pi $l, si 0 // $l = 0
+pi $_, si 5, pi $c, s $t, add $i, mul $_, sin $c // $c = sin( ( $t + $i ) * 5 )
+xi 0, y $i, zi 4, s $c, sf $l // put $c to (0, i, 4(= red buffer)) then fill same value for $l bytes
 
-zi 4, cp $z
-pi $_, si 1, pi $i, add $_
-pi $$_, si 6, pi $_, si 256, pi $i, sne $_, jf $$_, #j @loop
+pi $_, si 1, pi $i, add $_ // $i += 1
+pi $_, si 0, pi $i, seq $_, j @loop // if $i != 0 then jump to @loop
 
-pi $_, si 1, pi $t, add $_
-pi $$_, si 10, w $$_
+pi $_, si 1, pi $t, add $_ // $t += 1
+pi $_, si 10, w $_ // wait 10ms
 
-#j @update
+j @update // jump to @update

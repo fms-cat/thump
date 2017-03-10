@@ -1,14 +1,21 @@
-pi $i, si 0
+pi $i, si 0 // $i = 0
+pi $16, si 16 // $16 = 8
 
 @beg
-pi $x, si 0
-pi $z, si 8
-pi $l, si 256
-pi $c, s $i
-x $x, y $i, z $z, s $c, sf $l
+pi $j, si 0 // $j = 0
 
-zi 4, cp8 $z
-pi $_, si 1, pi $i, add $_
-pi $$_, si 10, w $$_
+@loop
+pi $x, s $i, mul $16 // $x = $i * 16
+pi $y, s $i, div $16, mul $16, add $j // $y = $i / 16 * 16 + $j
+pi $z, si 8 // $z = 8
+pi $l, s $16 // $l = 16
+x $x, y $y, z $z, s $i, sf $l // put $i to ($x, $y, $z) then fill same value for 16 bytes
 
-#j @beg
+pi $_, si 1, pi $j, add $_ // $j += 1
+pi $j, seq $16, j @loop // if $j != 16 then jump to @loop
+
+zi 4, cp8 $z // copy z=8 to z=(4,5,6) (= rgb buffer) as 8bit palette colors
+pi $_, si 1, pi $i, add $_ // $i += 1
+pi $_, si 10, w $_ // wait for 10ms
+
+j @beg // jump to @beg

@@ -1,12 +1,33 @@
 @charset "UTF-8";
 body {
-  margin: 0;
-  padding: 0;
   width: 100%;
   height: 100%;
-  background: #fff;
-  color: #222;
+  margin: 0;
+  padding: 0;
+  background: #000;
+  color: #fff;
   font: 200 16px/1.5 "Helvetica Neue", "ヒラギノ角ゴシック", sans-serif; }
+
+#divConsole {
+  display: inline-block;
+  width: 32px;
+  height: 240px;
+  padding: 8px;
+  background: #222;
+  color: #ddd;
+  overflow: hidden; }
+  #divConsole .divLog {
+    margin: 0;
+    height: 16px;
+    font-family: monospace;
+    font-size: 12px; }
+
+#textareaCode {
+  width: 496px;
+  height: 176px;
+  padding: 8px;
+  border: none;
+  font-family: monospace; }
 
 canvas {
   image-rendering: pixelated; }

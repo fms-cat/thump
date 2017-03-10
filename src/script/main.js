@@ -1,69 +1,77 @@
 import Thump from "./thump";
 
-let thump = new Thump();
+let thump = new Thump( document.getElementById( "canvas" ) );
 
-thump.run( `
-#l 2 8 img/msgothic_16x16pn.png
-#l 2 13 img/cat_big.png
-#l 1 12 img/cat_small.png
+textareaCode.value = `\
+pi $x, si 0 // $x = 0
+pi $y, si 0 // $y = 0
+pi $0, si 0 // $0 = 0
+pi $1, si 1 // $1 = 1
 
-@start
-pi $_, si 0, rns $_
-// pi $_, si 11, zi 4, cp $_
-// pi $_, si 8, gzr $_
+@loop
+pi $c, si 0, rnd $c // $c = random()
+x $x, y $y, zi 4, s $c // set $c to ($x, $y, 4 (=red buffer))
 
-@loopB
-// pi $i, si 0
+pi $x, add $1 // $x += 1
+pi $x, seq $0, j @loop // if x != 0 then jump to @loop
 
-@loopS
+pi $_, si 10, w $_ // wait for 10ms
 
-// func poker
-pi $_, si 0, pi $x, rnd $_
-pi $_, si 16, pi $y, rnd $_
-pi $_, si 2, pi $z, rnd $_
-pi $_, si 0, pi $v, rnd $_
-x $x, y $y, z $z, s $v // poke
+pi $y, add $1 // $y += 1
+j @loop // jump to @loop
+`;
 
-// cat, word and line
-pi $_, si 16, pi $x, s $i, mul $_
-pi $_, si 16, pi $y, s $i, div $_, mul $_
-pi $_, si 3, pi $__, si 4, pi $z, rnd $_, add $__
-pi $_, si 0, pi $v, rnd $_
-pi $_, si 32, pi $l, rnd $_
-pi $_, si 64, pi $__, si 166, pi $spr, rnd $_, add $__
-pi $_, si 13, spt $_ // set sprite table (cat)
-x $x, y $y, zi 4, sp8 $spr // draw sprite
-pi $_, si 8, spt $_ // set sprite table (word)
-x $x, y $y, z $z, sp $spr // draw sprite
-x $x, y $y, z $z, s $v, sf $l // draw line
+thump.run( textareaCode.value );
 
-// another looper
-pi $ic, si 0
+// ------
 
-@loopCS
+thump.setLogFunc( ( num ) => {
+  if ( 15 === divConsole.childElementCount ) {
+    divConsole.removeChild( divConsole.firstChild );
+  }
 
-// cat forward
-pi $_, si 16, pi $x, s $ic, mul $_, add $i
-pi $_, si 16, pi $y, s $ic, div $_, mul $_
-pi $_, si 12, spt $_ // set sprite table
-x $x, y $y, zi 17, sp $ic // draw sprite
+  let d = document.createElement( "div" );
+  d.classList.add( "divLog" );
+  d.innerText = num;
+  divConsole.appendChild( d );
+} );
 
-pi $_, si 1, pi $ic, add $_
-pi $_, si 256, pi $ic, seq $_, j @loopCS
+// ------
 
-pi $_, si 17, zi 4, cp8 $_
+let escListener = ( event ) => {
+  if ( event.which === 27 ) {
+    thump.stop();
+  }
+};
+window.addEventListener( "keydown", escListener );
 
-pi $_, si 2, w $_
+// ------
 
-pi $_, si 1, pi $i, add $_
-pi $_, si 256, pi $i, seq $_, j @loopS
+buttonRun.addEventListener( "click", () => {
+  while ( 0 !== divConsole.childElementCount ) {
+    divConsole.removeChild( divConsole.firstChild );
+  }
 
-j @loopB
-` );
+  thump.run( textareaCode.value );
+  thump.init();
+  thump.saveFrameMax = 0;
+} );
 
-buttonGood.addEventListener( "click", () => {
-  thump.stop();
+buttonRedice.addEventListener( "click", () => {
+  while ( 0 !== divConsole.childElementCount ) {
+    divConsole.removeChild( divConsole.firstChild );
+  }
+
   thump.redice();
   thump.init();
-  // thump.saveMode = true;
+  thump.saveFrameMax = 0;
+} );
+
+buttonSave.addEventListener( "click", () => {
+  while ( 0 !== divConsole.childElementCount ) {
+    divConsole.removeChild( divConsole.firstChild );
+  }
+
+  thump.init();
+  thump.saveFrameMax = 300;
 } );

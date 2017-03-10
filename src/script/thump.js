@@ -3,7 +3,7 @@ import eightBit from "./eightbit";
 import Xorshift from "./xorshift";
 
 let Thump = class {
-  constructor() {
+  constructor( _canvas ) {
     let thump = this;
 
     // ------
@@ -18,7 +18,7 @@ let Thump = class {
 
     // ------
 
-    thump.canvas = document.getElementById( "canvas" );
+    thump.canvas = _canvas;
     thump.canvas.width = 256;
     thump.canvas.height = 256;
 
@@ -26,6 +26,14 @@ let Thump = class {
     thump.context.fillStyle = "#000";
     thump.context.fillRect( 0, 0, 256, 256 );
     thump.imageData = thump.context.getImageData( 0, 0, 256, 256 );
+
+    // ------
+
+    thump.bgCanvas = document.createElement( "canvas" );
+    thump.bgCanvas.width = 256;
+    thump.bgCanvas.height = 256;
+
+    thump.bgContext = thump.bgCanvas.getContext( "2d" );
 
     // ------
 
@@ -48,17 +56,7 @@ let Thump = class {
 
     thump.update();
 
-    // ------
-
-    let escListener = ( event ) => {
-      if ( event.which === 27 ) {
-        thump.stopped = true;
-      }
-    };
-    window.addEventListener( "keydown", escListener );
-
     window.addEventListener( "unload", () => {
-      window.removeEventListener( "keydown", escListener );
       delete thump.buf;
       thump = null;
     } );
@@ -102,14 +100,11 @@ let Thump = class {
 
   save() {
     let thump = this;
-    if (
-      thump.saveFrameCount === 0 ||
-      thump.saveFrameMax < thump.saveFrameCount
-    ) { return; }
+    thump.saveFrameCount ++;
+    if ( thump.saveFrameMax < thump.saveFrameCount ) { return; }
     thump.saveAnchor.href = thump.canvas.toDataURL();
     thump.saveAnchor.download = ( "0000" + thump.saveFrameCount ).slice( -5 ) + ".png";
     thump.saveAnchor.click();
-    thump.saveFrameCount ++;
   }
 
   draw() {
@@ -132,13 +127,22 @@ let Thump = class {
     } );
   }
 
+  log( num ) {
+    console.log( num );
+  }
+
+  setLogFunc( func ) {
+    let thump = this;
+    thump.log = func;
+  }
+
   loadBuffer( url, loc, mode, callback ) {
     let thump = this;
     let image = new Image();
     image.onload = () => {
-      thump.context.clearRect( 0, 0, 256, 256 );
-      thump.context.drawImage( image, 0, 0, 256, 256 );
-      let data = thump.context.getImageData( 0, 0, 256, 256 );
+      thump.bgContext.clearRect( 0, 0, 256, 256 );
+      thump.bgContext.drawImage( image, 0, 0, 256, 256 );
+      let data = thump.bgContext.getImageData( 0, 0, 256, 256 );
 
       if ( mode === 0 ) {
         for ( let i = 0; i < 65536; i ++ ) {
@@ -240,16 +244,20 @@ let Thump = class {
       addPrg( prg[ 0 ], prg[ 1 ] );
     } );
 
-    let loadRemain = loads.length;
-    let loadDone = () => {
-      loadRemain --;
-      if ( loadRemain === 0 ) {
-        if ( typeof callback === "function" ) { callback(); }
-      }
-    };
-    loads.map( ( load ) => {
-      thump.loadBuffer( load[ 2 ], load[ 1 ], load[ 0 ], loadDone );
-    } );
+    if ( loads.length === 0 ) {
+      if ( typeof callback === "function" ) { callback(); }
+    } else {
+      let loadRemain = loads.length;
+      let loadDone = () => {
+        loadRemain --;
+        if ( loadRemain === 0 ) {
+          if ( typeof callback === "function" ) { callback(); }
+        }
+      };
+      loads.map( ( load ) => {
+        thump.loadBuffer( load[ 2 ], load[ 1 ], load[ 0 ], loadDone );
+      } );
+    }
   }
 
   redice( seed ) {

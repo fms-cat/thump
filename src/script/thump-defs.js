@@ -45,7 +45,11 @@ export default ( Thump, thump ) => {
   } );
 
   thump.def( "l", ( param ) => { // console log pointer
-    console.log( thump.get( param ) );
+    thump.log( thump.get( param ) );
+  } );
+
+  thump.def( "lc", ( param ) => { // console log pointer (char)
+    thump.log( String.fromCharCode( thump.get( param ) ) );
   } );
 
   thump.def( "li", ( param ) => { // console log immediately
@@ -218,6 +222,20 @@ export default ( Thump, thump ) => {
     }
   } );
 
+  thump.def( "srt", ( param ) => { // sort
+    let index = ~~( thump.pointer() / 256 ) * 256;
+    for ( let ii = 0; ii < thump.get( param ); ii ++ ) {
+      for ( let i = 0; i < 255; i ++ ) {
+        let a = thump.buf[ index + i ];
+        let b = thump.buf[ index + i + 1 ];
+        if ( b < a ) {
+          thump.buf[ index + i + 1 ] = a;
+          thump.buf[ index + i ] = b;
+        }
+      }
+    }
+  } );
+
   thump.def( "gzr", ( param ) => { // set gzr
     thump.set( Thump.P_GZR, thump.get( param ) );
   } );
@@ -232,5 +250,32 @@ export default ( Thump, thump ) => {
 
   thump.def( "spt", ( param ) => { // set sprite table
     thump.set( Thump.P_SPR, thump.get( param ) );
+  } );
+
+  thump.def( "jpg", ( param ) => { // jpegize!!
+    thump.stopped = true;
+    let z = thump.get( Thump.P_Z );
+    let d = thump.bgContext.getImageData( 0, 0, 256, 256 );
+    for ( let i = 0; i < 65536; i ++ ) {
+      d.data[ i * 4 + 0 ] = thump.get( z * 65536 + i );
+      d.data[ i * 4 + 1 ] = thump.get( ( z + 1 ) * 65536 + i );
+      d.data[ i * 4 + 2 ] = thump.get( ( z + 2 ) * 65536 + i );
+      d.data[ i * 4 + 3 ] = 255;
+    }
+    thump.bgContext.putImageData( d, 0, 0 );
+    let url = thump.bgCanvas.toDataURL( "image/jpeg", thump.get( param ) / 256.0 );
+    let i = new Image();
+    i.onload = () => {
+      thump.bgContext.fillRect( 0, 0, 256, 256 );
+      thump.bgContext.drawImage( i, 0, 0 );
+      let d = thump.bgContext.getImageData( 0, 0, 256, 256 );
+      for ( let i = 0; i < 65536; i ++ ) {
+        thump.set( z * 65536 + i, d.data[ i * 4 + 0 ] );
+        thump.set( ( z + 1 ) * 65536 + i, d.data[ i * 4 + 1 ] );
+        thump.set( ( z + 2 ) * 65536 + i, d.data[ i * 4 + 2 ] );
+      }
+      thump.stopped = false;
+    };
+    i.src = url;
   } );
 };
