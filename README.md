@@ -36,7 +36,9 @@ Buffer is separated by `256*256`.
 - fifth, sixth, and seventh 65536 is used for drawing. Each region corresponds to R, G, B.
 - You can use other region for sprite table or other. When you load sprite table initially, don't use regions I explain above.
 
-### Instructions of Thump
+## Examples
+
+### How to program in thump
 
 ```
 // Put 4 to `$a`.
@@ -57,9 +59,18 @@ s $a
 add $_
 
 // Print out `$a` and `$b`.
+// `l` prints the value pointed by param
 // You can write two or more instructions in one line using comma
 l $a, l $b
 
+// `w` is used for waiting.
+// Value pointed by param is used for waiting time (in ms)
+pi $_, si 200, w $_
+```
+
+### How to drawing in Thump
+
+```
 // `pi` can only use for moving pointer in range of 0-255
 // You can use `xi`, `yi`, and `zi` to move in range of 0-16777215
 // As explained in "Buffer of Thump" above, z=4 is drawing buffer of red
@@ -68,9 +79,8 @@ xi 100, yi 100, zi 4
 // This `si` will put small red dot on canvas!
 si 255
 
+// `w` is also used for refreshing canvas
 // After the drawing instructions, you need to `w` to refresh canvas
-// Also `w` is used for waiting.
-// Value at param is used for waiting time (in ms)
 pi $_, si 100, w $_
 
 // At the end of program, The program counter automatically jumps to start of program
@@ -112,6 +122,7 @@ pi $_, si 1, pi $i, add $_
 pi $_, si 200, pi $i, seq $_, j @loop
 
 // put "D", "o", "n", "e", "!", to console
+// `lc` is similar to `l`, but prints char instead of value
 pi $_, si 68, lc $_
 pi $_, si 111, lc $_
 pi $_, si 110, lc $_
@@ -120,6 +131,7 @@ pi $_, si 33, lc $_
 ```
 
 ### How to glitch in Thump
+
 ```
 pi $ix, si 0 // $ix = 0
 pi $iy, si 0 // $iy = 0
@@ -133,7 +145,7 @@ pi $1, si 1 // $1 = 1
 // `rnd` generates random number in range of 0 - value pointed by param
 // If you throw 0, it's special case, `rnd` generates random value in range of 0 - 255
 pi $x, si 0, rnd $x // $x = random()
-pi $y, si 4, rnd $y // $y = random()
+pi $y, si 4, rnd $y // $y = random() (in range of 0 - 3)
 pi $v, si 0, rnd $v // $v = random()
 x $x, y $y, zi 1, s $v // GLITCH!!
 
