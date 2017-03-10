@@ -167,3 +167,7 @@ pi $_, si 10, w $_ // wait for 10ms
 pi $iy, add $1 // $iy += 1
 j @beg // jump to @beg
 ```
+
+## Greetings
+
+Thump is made with great inspiration of [Brainf**k](https://esolangs.org/wiki/Brainfuck), [PICO-8](http://www.lexaloffle.com/pico-8.php), and [TIS-100](http://store.steampowered.com/app/370360/).
