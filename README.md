@@ -4,6 +4,8 @@ Low-level-like environment for simulating multi paradigm glitch
 
 ![](https://i.imgur.com/6RXUQzk.gif)
 
+[My experiments of Thump](http://imgur.com/a/0laNk)
+
 ---
 
 ## Try Thump on browser
