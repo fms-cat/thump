@@ -86,8 +86,17 @@ buttonSave.addEventListener("click", function () {
     divConsole.removeChild(divConsole.firstChild);
   }
 
-  thump.init();
-  thump.saveFrameMax = 300;
+  if (thump.gifRecording) {
+    thump.saveGifStop();
+    buttonSave.value = "GIF";
+  } else {
+    thump.init();
+    thump.saveGif({
+      workerScript: "lib/gif.worker.js",
+      dither: "FloydSteinberg"
+    });
+    buttonSave.value = "Stop";
+  }
 });
 
 },{"./thump":"/Users/Yutaka/Dropbox/pro/JavaScript/thump/src/script/thump.js"}],"/Users/Yutaka/Dropbox/pro/JavaScript/thump/src/script/palette256.js":[function(require,module,exports){
@@ -173,12 +182,12 @@ exports.default = function (Thump, thump) {
 
   thump.def("li", function (param) {
     // console log immediately
-    console.log(param);
+    thump.log(param);
   });
 
   thump.def("lp", function () {
     // console log pointer
-    console.log(thump.get(thump.pointer()));
+    thump.log(thump.get(thump.pointer()));
   });
 
   thump.def("g", function (param) {
@@ -490,9 +499,7 @@ var Thump = function () {
 
     // ------
 
-    thump.saveFrameMax = 0;
-    thump.saveFrameCount = 0;
-    thump.saveAnchor = document.createElement("a");
+    thump.gifRecording = false;
 
     // ------
 
@@ -559,16 +566,54 @@ var Thump = function () {
       return thump.get16b(Thump.P_X) + thump.get(Thump.P_Z) * 65536;
     }
   }, {
-    key: "save",
-    value: function save() {
+    key: "saveGifFrame",
+    value: function saveGifFrame() {
       var thump = this;
-      thump.saveFrameCount++;
-      if (thump.saveFrameMax < thump.saveFrameCount) {
+      if (!thump.gifRecording) {
         return;
       }
-      thump.saveAnchor.href = thump.canvas.toDataURL();
-      thump.saveAnchor.download = ("0000" + thump.saveFrameCount).slice(-5) + ".png";
-      thump.saveAnchor.click();
+
+      thump.gif.addFrame(canvas, { delay: 20, copy: true });
+    }
+  }, {
+    key: "saveGif",
+    value: function saveGif(options) {
+      var thump = this;
+      if (typeof GIF === "undefined") {
+        console.error("saveGif: gif.js seems not to be loaded. export aborted");
+        return;
+      }
+
+      thump.gif = new GIF(options);
+      thump.gifRecording = true;
+    }
+  }, {
+    key: "saveGifStop",
+    value: function saveGifStop() {
+      var thump = this;
+      if (!thump.gifRecording) {
+        return;
+      }
+
+      thump.gifRecording = false;
+
+      thump.gif.on("finished", function (blob) {
+        var a = document.createElement("a");
+        var url = URL.createObjectURL(blob);
+        a.href = url;
+        a.download = "Thump" + thump.seed + ".gif";
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+      thump.gif.on("progress", function (prog) {
+        thump.context.fillStyle = "#000";
+        thump.context.fillRect(0, 0, 256, 256);
+        thump.context.fillStyle = "#fff";
+        thump.context.fillText("Gif progress: " + ~~(prog * 100) + "%", 100, 100);
+      });
+
+      thump.gif.render();
+      thump.stop();
     }
   }, {
     key: "draw",
@@ -580,7 +625,7 @@ var Thump = function () {
         thump.imageData.data[i * 4 + 2] = thump.get(thump.get(Thump.P_GZB) * 65536 + i);
       }
       thump.context.putImageData(thump.imageData, 0, 0);
-      thump.save();
+      thump.saveGifFrame();
     }
   }, {
     key: "def",
@@ -759,7 +804,7 @@ var Thump = function () {
       var thump = this;
 
       thump.stopped = true;
-      thump.saveFrameCount = 0;
+      thump.gifRecording = false;
 
       thump.buf.fill(0);
 

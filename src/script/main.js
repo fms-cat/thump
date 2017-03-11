@@ -72,6 +72,15 @@ buttonSave.addEventListener( "click", () => {
     divConsole.removeChild( divConsole.firstChild );
   }
 
-  thump.init();
-  thump.saveFrameMax = 300;
+  if ( thump.gifRecording ) {
+    thump.saveGifStop();
+    buttonSave.value = "GIF";
+  } else {
+    thump.init();
+    thump.saveGif( {
+      workerScript: "lib/gif.worker.js",
+      dither: "FloydSteinberg"
+    } );
+    buttonSave.value = "Stop";
+  }
 } );

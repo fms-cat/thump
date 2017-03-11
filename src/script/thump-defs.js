@@ -53,11 +53,11 @@ export default ( Thump, thump ) => {
   } );
 
   thump.def( "li", ( param ) => { // console log immediately
-    console.log( param );
+    thump.log( param );
   } );
 
   thump.def( "lp", () => { // console log pointer
-    console.log( thump.get( thump.pointer() ) );
+    thump.log( thump.get( thump.pointer() ) );
   } );
 
   thump.def( "g", ( param ) => { // get

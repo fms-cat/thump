@@ -37,9 +37,7 @@ let Thump = class {
 
     // ------
 
-    thump.saveFrameMax = 0;
-    thump.saveFrameCount = 0;
-    thump.saveAnchor = document.createElement( "a" );
+    thump.gifRecording = false;
 
     // ------
 
@@ -98,13 +96,47 @@ let Thump = class {
     return thump.get16b( Thump.P_X ) + thump.get( Thump.P_Z ) * 65536;
   }
 
-  save() {
+  saveGifFrame() {
     let thump = this;
-    thump.saveFrameCount ++;
-    if ( thump.saveFrameMax < thump.saveFrameCount ) { return; }
-    thump.saveAnchor.href = thump.canvas.toDataURL();
-    thump.saveAnchor.download = ( "0000" + thump.saveFrameCount ).slice( -5 ) + ".png";
-    thump.saveAnchor.click();
+    if ( !thump.gifRecording ) { return; }
+
+    thump.gif.addFrame( canvas, { delay: 20, copy: true } );
+  }
+
+  saveGif( options ) {
+    let thump = this;
+    if ( typeof GIF === "undefined" ) {
+      console.error( "saveGif: gif.js seems not to be loaded. export aborted" );
+      return;
+    }
+
+    thump.gif = new GIF( options );
+    thump.gifRecording = true;
+  }
+
+  saveGifStop() {
+    let thump = this;
+    if ( !thump.gifRecording ) { return; }
+
+    thump.gifRecording = false;
+
+    thump.gif.on( "finished", ( blob ) => {
+      let a = document.createElement( "a" );
+      let url = URL.createObjectURL( blob );
+      a.href = url;
+      a.download = "Thump" + thump.seed + ".gif";
+      a.click();
+      URL.revokeObjectURL( url );
+    } );
+    thump.gif.on( "progress", ( prog ) => {
+      thump.context.fillStyle = "#000";
+      thump.context.fillRect( 0, 0, 256, 256 );
+      thump.context.fillStyle = "#fff";
+      thump.context.fillText( "Gif progress: " + ~~( prog * 100 ) + "%", 100, 100 );
+    } );
+
+    thump.gif.render();
+    thump.stop();
   }
 
   draw() {
@@ -115,7 +147,7 @@ let Thump = class {
       thump.imageData.data[ i * 4 + 2 ] = thump.get( thump.get( Thump.P_GZB ) * 65536 + i );
     }
     thump.context.putImageData( thump.imageData, 0, 0 );
-    thump.save();
+    thump.saveGifFrame();
   }
 
   def( name, func ) {
@@ -270,7 +302,7 @@ let Thump = class {
     let thump = this;
 
     thump.stopped = true;
-    thump.saveFrameCount = 0;
+    thump.gifRecording = false;
 
     thump.buf.fill( 0 );
 

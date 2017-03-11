@@ -171,3 +171,5 @@ j @beg // jump to @beg
 ## Greetings
 
 Thump is made with great inspiration of [Brainf**k](https://esolangs.org/wiki/Brainfuck), [PICO-8](http://www.lexaloffle.com/pico-8.php), and [TIS-100](http://store.steampowered.com/app/370360/).
+
+GIF export is powered by [Gif.js](https://github.com/jnordberg/gif.js).
