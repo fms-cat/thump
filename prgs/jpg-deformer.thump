@@ -1,0 +1,157 @@
+// slow as hell 🔥🔥🔥🔥
+
+#l 2 15 img/cat_small.png
+
+pi $0, si 0
+pi $1, si 1
+pi $2, si 2
+pi $3, si 3
+pi $4, si 4
+pi $8, si 8
+pi $9, si 9
+pi $32, si 32
+
+pi $zColor, si 4
+pi $zRand, si 8
+pi $zNoise, si 9
+pi $zTable, si 12
+pi $zImage, si 15
+
+// ------
+
+pi $x, si 0
+pi $y, si 0
+
+@loopP3
+
+x $x, y $y, zi 12, s $x
+x $x, y $y, zi 13, s $y
+x $x, y $y, zi 14, si 128
+
+pi $x, add $1, seq $0, j @loopP3, si 0
+pi $y, add $1, seq $0, j @loopP3, si 0
+
+pi $_, s $zImage, z $zTable, cpa $_
+
+// ------
+
+@reset
+
+pi $x, si 0
+pi $y, si 0
+pi $z, s $0
+
+@loopP
+
+pi $c, si 0, rnd $c
+pi $dx, s $x
+pi $dy, s $y
+x $dx, y $dy, z $zRand, s $c
+
+pi $x, add $1
+pi $x, seq $0, j @loopP
+pi $x, s $0
+
+pi $y, add $1
+pi $y, seq $0, j @loopP
+pi $y, s $0
+
+// ------
+
+pi $x, s $0
+pi $y, s $0
+pi $r, s $2
+pi $rr, si 128
+
+pi $__, s $z, add $zNoise
+pi $_, si 24, z $__, cp $_
+
+@loopP2
+
+x $x, y $y, z $zRand, g $c, pi $c, div $r
+pi $dx, s $x, mul $rr
+
+pi $ir, si 0
+@loopP2Rect
+pi $dy, s $y, mul $rr, add $ir
+pi $_, s $z, add $zNoise
+x $dx, y $dy, z $_, add $c, sf $rr
+
+pi $ir, add $1
+pi $ir, seq $rr, j @loopP2Rect
+
+pi $x, add $1
+pi $x, seq $r, j @loopP2
+pi $x, s $0
+
+pi $y, add $1
+pi $y, seq $r, j @loopP2
+pi $y, s $0
+
+pi $r, mul $2
+pi $rr, div $2
+pi $rr, seq $0, j @loopP2
+
+pi $z, add $1
+pi $_, si 3, pi $z, seq $_, j @loopP
+
+// ------
+
+pi $frame, si 0
+
+@beg
+
+pi $x, si 0
+pi $y, si 0
+pi $z, si 0
+
+@loop
+
+pi $_, si 51
+pi $zx, s $zNoise
+pi $zy, s $zNoise, add $1
+x $x, y $y, z $zx, g $xv, pi $xv, div $_, sub $2
+x $x, y $y, z $zy, g $yv, pi $yv, div $_, sub $2
+
+pi $xp, s $x, add $xv
+pi $yp, s $y, add $yv
+
+pi $zt, s $z, add $zTable
+x $xp, y $yp, z $zt, g $c
+
+pi $_, s $z, add $zColor
+x $x, y $y, z $_, s $c
+
+// ------
+
+pi $x, add $1
+pi $x, seq $0, j @loop
+pi $x, s $0
+
+pi $y, add $1
+pi $y, seq $0, j @loop
+pi $y, s $0
+
+pi $__, s $zColor, add $z
+pi $_, si 64, z $__, jpg $_
+pi $_, s $zTable, add $z
+z $_, cp $__
+
+pi $z, add $1
+pi $_, si 3, pi $z, seq $_, j @loop
+
+// ------
+
+// func poker, it brings GLITCH!!
+pi $_, si 0, pi $x, rnd $_
+pi $_, si 16, pi $y, rnd $_
+pi $z, si 1
+pi $_, si 0, pi $v, rnd $_
+x $x, y $y, z $z, s $v // poke
+
+pi $_, si 20, w $_
+
+pi $frame, add $1
+l $frame
+
+j @beg

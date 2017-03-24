@@ -118,7 +118,7 @@ exports.default = function (Thump, thump) {
   thump.def("v", function (param) {
     // void
     thump.set16b(Thump.P_CNT, 65536 - 2);
-    return 1;
+    return 50;
   });
 
   thump.def("w", function (param) {
@@ -328,6 +328,11 @@ exports.default = function (Thump, thump) {
     thump.set(thump.pointer(), thump.get(thump.pointer()) * thump.get(param));
   });
 
+  thump.def("pow", function (param) {
+    // pow value
+    thump.set(thump.pointer(), Math.pow(thump.get(thump.pointer()), thump.get(param)));
+  });
+
   thump.def("div", function (param) {
     // div value
     thump.set(thump.pointer(), thump.get(thump.pointer()) / thump.get(param));
@@ -336,6 +341,12 @@ exports.default = function (Thump, thump) {
   thump.def("mod", function (param) {
     // mod value
     thump.set(thump.pointer(), thump.get(thump.pointer()) % thump.get(param));
+  });
+
+  thump.def("abs", function (param) {
+    // abs value
+    var v = thump.get(thump.pointer());
+    thump.set(thump.pointer(), v < thump.get(param) ? v : 256 - v);
   });
 
   thump.def("sin", function (param) {
@@ -411,6 +422,7 @@ exports.default = function (Thump, thump) {
   thump.def("jpg", function (param) {
     // jpegize!!
     thump.stopped = true;
+
     var z = thump.get(Thump.P_Z);
     var d = thump.bgContext.getImageData(0, 0, 256, 256);
     for (var _i = 0; _i < 65536; _i++) {
@@ -420,7 +432,9 @@ exports.default = function (Thump, thump) {
       d.data[_i * 4 + 3] = 255;
     }
     thump.bgContext.putImageData(d, 0, 0);
+
     var url = thump.bgCanvas.toDataURL("image/jpeg", thump.get(param) / 256.0);
+
     var i = new Image();
     i.onload = function () {
       thump.bgContext.fillRect(0, 0, 256, 256);
@@ -431,9 +445,14 @@ exports.default = function (Thump, thump) {
         thump.set((z + 1) * 65536 + _i2, d.data[_i2 * 4 + 1]);
         thump.set((z + 2) * 65536 + _i2, d.data[_i2 * 4 + 2]);
       }
+
+      URL.revokeObjectURL(url);
+      i = null;
       thump.stopped = false;
     };
     i.src = url;
+
+    return -1;
   });
 };
 
@@ -500,6 +519,7 @@ var Thump = function () {
     // ------
 
     thump.gifRecording = false;
+    thump.gifFrameCount = 0;
 
     // ------
 
@@ -573,7 +593,19 @@ var Thump = function () {
         return;
       }
 
+      thump.gifFrameCount++;
+      if (!thump.gifFrameCount === 0) {
+        return;
+      }
+
       thump.gif.addFrame(canvas, { delay: 20, copy: true });
+
+      thump.context.globalAlpha = 0.5;
+      thump.context.fillStyle = "#000";
+      thump.context.fillRect(0, 0, 256, 16);
+      thump.context.fillStyle = "#fff";
+      thump.context.fillText("Gif frames: " + ~~thump.gifFrameCount, 10, 13);
+      thump.context.globalAlpha = 1.0;
     }
   }, {
     key: "saveGif",
@@ -586,6 +618,7 @@ var Thump = function () {
 
       thump.gif = new GIF(options);
       thump.gifRecording = true;
+      thump.gifFrameCount = -1;
     }
   }, {
     key: "saveGifStop",
@@ -609,7 +642,7 @@ var Thump = function () {
         thump.context.fillStyle = "#000";
         thump.context.fillRect(0, 0, 256, 256);
         thump.context.fillStyle = "#fff";
-        thump.context.fillText("Gif progress: " + ~~(prog * 100) + "%", 100, 100);
+        thump.context.fillText("Gif progress: " + ~~(prog * 100) + "%", 10, 13);
       });
 
       thump.gif.render();
@@ -838,17 +871,27 @@ var Thump = function () {
       var waited = false;
 
       if (!thump.stopped) {
-        for (var i = 0; i < 1E4; i++) {
+        var b = +new Date();
+        for (var i = 0; i < 1E13; i++) {
+          if (i % 1E3 === 0) {
+            var n = +new Date();
+            if (20 < n - b) {
+              break;
+            }
+          }
+
           var funchead = thump.get(Thump.P_PRG) * 65536 + thump.get16b(Thump.P_CNT);
           var funcp = thump.get(funchead);
           var param = thump.get(funchead + 1);
           var w = thump.funcs[funcp % thump.funcs.length](param);
           thump.set16b(Thump.P_CNT, thump.get16b(Thump.P_CNT) + 2);
           if (w) {
-            thump.draw();
+            if (0 < w) {
+              thump.draw();
+            }
             setTimeout(function () {
               thump.update();
-            }, w);
+            }, Math.abs(w));
             waited = true;
             break;
           }

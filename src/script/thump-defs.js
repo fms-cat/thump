@@ -1,7 +1,7 @@
 export default ( Thump, thump ) => {
   thump.def( "v", ( param ) => { // void
     thump.set16b( Thump.P_CNT, 65536 - 2 );
-    return 1;
+    return 50;
   } );
 
   thump.def( "w", ( param ) => { // wait a while
@@ -185,12 +185,21 @@ export default ( Thump, thump ) => {
     thump.set( thump.pointer(), thump.get( thump.pointer() ) * thump.get( param ) );
   } );
 
+  thump.def( "pow", ( param ) => { // pow value
+    thump.set( thump.pointer(), Math.pow( thump.get( thump.pointer() ), thump.get( param ) ) );
+  } );
+
   thump.def( "div", ( param ) => { // div value
     thump.set( thump.pointer(), thump.get( thump.pointer() ) / thump.get( param ) );
   } );
 
   thump.def( "mod", ( param ) => { // mod value
     thump.set( thump.pointer(), thump.get( thump.pointer() ) % thump.get( param ) );
+  } );
+
+  thump.def( "abs", ( param ) => { // abs value
+    let v = thump.get( thump.pointer() );
+    thump.set( thump.pointer(), v < thump.get( param ) ? v : ( 256 - v ) );
   } );
 
   thump.def( "sin", ( param ) => { // sin value
@@ -254,6 +263,7 @@ export default ( Thump, thump ) => {
 
   thump.def( "jpg", ( param ) => { // jpegize!!
     thump.stopped = true;
+
     let z = thump.get( Thump.P_Z );
     let d = thump.bgContext.getImageData( 0, 0, 256, 256 );
     for ( let i = 0; i < 65536; i ++ ) {
@@ -263,7 +273,9 @@ export default ( Thump, thump ) => {
       d.data[ i * 4 + 3 ] = 255;
     }
     thump.bgContext.putImageData( d, 0, 0 );
+
     let url = thump.bgCanvas.toDataURL( "image/jpeg", thump.get( param ) / 256.0 );
+
     let i = new Image();
     i.onload = () => {
       thump.bgContext.fillRect( 0, 0, 256, 256 );
@@ -274,8 +286,13 @@ export default ( Thump, thump ) => {
         thump.set( ( z + 1 ) * 65536 + i, d.data[ i * 4 + 1 ] );
         thump.set( ( z + 2 ) * 65536 + i, d.data[ i * 4 + 2 ] );
       }
+
+      URL.revokeObjectURL( url );
+      i = null;
       thump.stopped = false;
     };
     i.src = url;
+
+    return -1;
   } );
 };

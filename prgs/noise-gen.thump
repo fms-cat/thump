@@ -1,0 +1,75 @@
+pi $0, si 0
+pi $1, si 1
+pi $2, si 2
+pi $4, si 4
+pi $8, si 8
+pi $32, si 32
+
+pi $zRand, si 8
+pi $zNoise, si 4
+
+// ------
+
+pi $x, si 0
+pi $y, si 0
+pi $z, si 4
+
+@loopP
+
+pi $c, si 0, rnd $c
+pi $dx, s $x
+pi $dy, s $y
+x $dx, y $dy, z $zRand, s $c
+
+pi $x, add $1
+pi $x, seq $0, j @loopP
+pi $x, s $0
+
+pi $y, add $1
+pi $y, seq $0, j @loopP
+pi $y, s $0
+
+// ------
+
+pi $x, s $0
+pi $y, s $0
+pi $r, s $2
+pi $rr, si 128
+
+pi $_, si 24, z $z, cp $_
+
+@loopP2
+
+x $x, y $y, z $zRand, g $c, pi $c, div $r
+pi $dx, s $x, mul $rr
+
+pi $ir, si 0
+@loopP2Rect
+pi $dy, s $y, mul $rr, add $ir
+x $dx, y $dy, z $z, add $c, sf $rr
+
+pi $ir, add $1
+pi $ir, seq $rr, j @loopP2Rect
+
+pi $x, add $1
+pi $x, seq $r, j @loopP2
+pi $x, s $0
+
+pi $y, add $1
+pi $y, seq $r, j @loopP2
+pi $y, s $0
+
+pi $r, mul $2
+pi $rr, div $2
+pi $rr, seq $0, j @loopP2
+
+pi $z, add $1
+pi $_, si 7, pi $z, seq $_, j @loopP
+pi $z, si 4
+
+// ------
+
+@beg
+
+pi $_, si 20, w $_
+j @beg

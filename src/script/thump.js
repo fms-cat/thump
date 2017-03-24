@@ -38,6 +38,7 @@ let Thump = class {
     // ------
 
     thump.gifRecording = false;
+    thump.gifFrameCount = 0;
 
     // ------
 
@@ -100,7 +101,17 @@ let Thump = class {
     let thump = this;
     if ( !thump.gifRecording ) { return; }
 
+    thump.gifFrameCount ++;
+    if ( !thump.gifFrameCount === 0 ) { return; }
+
     thump.gif.addFrame( canvas, { delay: 20, copy: true } );
+
+    thump.context.globalAlpha = 0.5;
+    thump.context.fillStyle = "#000";
+    thump.context.fillRect( 0, 0, 256, 16 );
+    thump.context.fillStyle = "#fff";
+    thump.context.fillText( "Gif frames: " + ~~( thump.gifFrameCount ), 10, 13 );
+    thump.context.globalAlpha = 1.0;
   }
 
   saveGif( options ) {
@@ -112,6 +123,7 @@ let Thump = class {
 
     thump.gif = new GIF( options );
     thump.gifRecording = true;
+    thump.gifFrameCount = -1;
   }
 
   saveGifStop() {
@@ -132,7 +144,7 @@ let Thump = class {
       thump.context.fillStyle = "#000";
       thump.context.fillRect( 0, 0, 256, 256 );
       thump.context.fillStyle = "#fff";
-      thump.context.fillText( "Gif progress: " + ~~( prog * 100 ) + "%", 100, 100 );
+      thump.context.fillText( "Gif progress: " + ~~( prog * 100 ) + "%", 10, 13 );
     } );
 
     thump.gif.render();
@@ -335,15 +347,23 @@ let Thump = class {
     let waited = false;
 
     if ( !thump.stopped ) {
-      for ( let i = 0; i < 1E4; i ++ ) {
+      let b = +new Date();
+      for ( let i = 0; i < 1E13; i ++ ) {
+        if ( i % 1E3 === 0 ) {
+          let n = +new Date();
+          if ( 20 < n - b ) { break; }
+        }
+
         let funchead = thump.get( Thump.P_PRG ) * 65536 + thump.get16b( Thump.P_CNT );
         let funcp = thump.get( funchead );
         let param = thump.get( funchead + 1 );
         let w = thump.funcs[ funcp % thump.funcs.length ]( param );
         thump.set16b( Thump.P_CNT, thump.get16b( Thump.P_CNT ) + 2 );
         if ( w ) {
-          thump.draw();
-          setTimeout( () => { thump.update() }, w );
+          if ( 0 < w ) {
+            thump.draw();
+          }
+          setTimeout( () => { thump.update() }, Math.abs( w ) );
           waited = true;
           break;
         }
