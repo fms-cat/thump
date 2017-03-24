@@ -99,6 +99,25 @@ buttonSave.addEventListener("click", function () {
   }
 });
 
+// ------
+
+var _loop = function _loop(i) {
+  var bank = i;
+  var input = document.getElementById("imageBank" + bank);
+
+  input.addEventListener("change", function () {
+    var reader = new FileReader();
+    reader.onload = function () {
+      thump.setImageBank(bank, reader.result);
+    };
+    reader.readAsDataURL(input.files[0]);
+  });
+};
+
+for (var i = 0; i < 8; i++) {
+  _loop(i);
+}
+
 },{"./thump":"/Users/Yutaka/Dropbox/pro/JavaScript/thump/src/script/thump.js"}],"/Users/Yutaka/Dropbox/pro/JavaScript/thump/src/script/palette256.js":[function(require,module,exports){
 "use strict";
 
@@ -518,6 +537,13 @@ var Thump = function () {
 
     // ------
 
+    thump.imageBank = [];
+    for (var i = 0; i < Thump.BANK_LEN; i++) {
+      thump.imageBank[i] = new Image();
+    }
+
+    // ------
+
     thump.gifRecording = false;
     thump.gifFrameCount = 0;
 
@@ -682,11 +708,17 @@ var Thump = function () {
       thump.log = func;
     }
   }, {
-    key: "loadBuffer",
-    value: function loadBuffer(url, loc, mode, callback) {
+    key: "setImageBank",
+    value: function setImageBank(bank, url) {
       var thump = this;
-      var image = new Image();
-      image.onload = function () {
+      thump.imageBank[bank].src = url;
+    }
+  }, {
+    key: "loadBuffer",
+    value: function loadBuffer(bank, loc, mode, callback) {
+      var thump = this;
+
+      var load = function load() {
         thump.bgContext.clearRect(0, 0, 256, 256);
         thump.bgContext.drawImage(image, 0, 0, 256, 256);
         var data = thump.bgContext.getImageData(0, 0, 256, 256);
@@ -713,7 +745,19 @@ var Thump = function () {
           callback();
         }
       };
-      image.src = url;
+
+      var image = void 0;
+      var bankn = parseInt(bank);
+      if (0 <= bankn && bankn < Thump.BANK_LEN) {
+        image = thump.imageBank[bank];
+        load();
+      } else {
+        image = new Image();
+        image.onload = function () {
+          load();
+        };
+        image.src = bank;
+      }
     }
   }, {
     key: "interpret",
@@ -944,6 +988,10 @@ Thump.Z_PRG = 1;
 Thump.Z_GZR = 4;
 Thump.Z_GZG = 5;
 Thump.Z_GZB = 6;
+
+// ------
+
+Thump.BANK_LEN = 16;
 
 // ------
 

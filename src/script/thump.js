@@ -37,6 +37,13 @@ let Thump = class {
 
     // ------
 
+    thump.imageBank = [];
+    for ( let i = 0; i < Thump.BANK_LEN; i ++ ) {
+      thump.imageBank[ i ] = new Image();
+    }
+
+    // ------
+
     thump.gifRecording = false;
     thump.gifFrameCount = 0;
 
@@ -180,10 +187,15 @@ let Thump = class {
     thump.log = func;
   }
 
-  loadBuffer( url, loc, mode, callback ) {
+  setImageBank( bank, url ) {
     let thump = this;
-    let image = new Image();
-    image.onload = () => {
+    thump.imageBank[ bank ].src = url;
+  }
+
+  loadBuffer( bank, loc, mode, callback ) {
+    let thump = this;
+
+    let load = () => {
       thump.bgContext.clearRect( 0, 0, 256, 256 );
       thump.bgContext.drawImage( image, 0, 0, 256, 256 );
       let data = thump.bgContext.getImageData( 0, 0, 256, 256 );
@@ -207,8 +219,18 @@ let Thump = class {
       }
       
       if ( typeof callback === "function" ) { callback(); }
-    };
-    image.src = url;
+    }
+
+    let image;
+    let bankn = parseInt( bank );
+    if ( 0 <= bankn && bankn < Thump.BANK_LEN ) {
+      image = thump.imageBank[ bank ];
+      load();
+    } else {
+      image = new Image();
+      image.onload = () => { load(); }
+      image.src = bank;
+    }
   }
 
   interpret( str, callback ) {
@@ -409,6 +431,10 @@ Thump.Z_PRG = 1;
 Thump.Z_GZR = 4;
 Thump.Z_GZG = 5;
 Thump.Z_GZB = 6;
+
+// ------
+
+Thump.BANK_LEN = 16;
 
 // ------
 

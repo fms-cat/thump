@@ -84,3 +84,18 @@ buttonSave.addEventListener( "click", () => {
     buttonSave.value = "Stop";
   }
 } );
+
+// ------
+
+for ( let i = 0; i < 8; i ++ ) {
+  let bank = i;
+  let input = document.getElementById( "imageBank" + bank );
+  
+  input.addEventListener( "change", () => {
+    let reader = new FileReader();
+    reader.onload = () => {
+      thump.setImageBank( bank, reader.result );
+    }
+    reader.readAsDataURL( input.files[ 0 ] );
+  } );
+}
