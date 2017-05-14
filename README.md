@@ -68,6 +68,8 @@ l $a, l $b
 // `w` is used for waiting.
 // Value pointed by param is used for waiting time (in ms)
 pi $_, si 200, w $_
+
+// At the end of program, The program counter automatically jumps to start of program
 ```
 
 ### How to drawing in Thump
@@ -84,8 +86,6 @@ si 255
 // `w` is also used for refreshing canvas
 // After the drawing instructions, you need to `w` to refresh canvas
 pi $_, si 100, w $_
-
-// At the end of program, The program counter automatically jumps to start of program
 ```
 
 ### How to loop in Thump

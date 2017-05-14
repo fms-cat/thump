@@ -1,0 +1,95 @@
+#l 1 8 0 // ImageBank0: https://i.imgur.com/uGYSHiF.png
+#l 1 9 img/msgothic_16x16p.png
+
+pi $0, si 0
+pi $1, si 1
+pi $2, si 2
+pi $4, si 4
+pi $8, si 8
+pi $9, si 9
+pi $16, si 16
+pi $32, si 32
+pi $64, si 64
+pi $96, si 96
+pi $128, si 128
+pi $160, si 160
+
+// === setup ===
+
+pi $liney, si 0
+
+// === update ===
+
+@update
+
+// === line ===
+
+pi $lineyl, si 0
+@lineloop
+
+pi $c, s $liney, div $2, sub $64, sin $c
+xi 0, y $liney, zi 4, s $c, sf $0
+pi $c, s $liney, sub $64, sin $c, div $2, add $64
+xi 0, y $liney, zi 5, s $c, sf $0
+pi $c, s $liney, sub $32, sin $c, div $2, add $64
+xi 0, y $liney, zi 6, s $c, sf $0
+
+pi $liney, add $1
+pi $lineyl, add $1, seq $16, j @lineloop
+
+// === feedback ===
+
+pi $i0, si 0
+pi $i1, si 0
+spt $9
+@circloop
+
+pi $x, si 0, rnd $0
+pi $y, si 0, rnd $0
+
+x $x, y $y, zi 4, g $cr
+x $x, y $y, zi 5, g $cg
+x $x, y $y, zi 6, g $cb
+
+xi 16, yi 3, zi 0, s $cr
+yi 4, s $cg
+yi 5, s $cb
+
+pi $sp, rnd $0
+x $x, y $y, zi 4, sp8 $sp
+
+pi $i0, add $1, seq $0, j @circloop
+pi $i1, add $1, seq $4, j @circloop
+
+// === image ===
+
+pi $i, si 0
+spt $8
+@imageloop
+
+pi $x, s $i, mul $16
+pi $y, s $i, div $16, mul $16
+x $x, y $y, zi 4, sp8 $i
+
+pi $i, add $1, seq $0, j @imageloop
+
+// === glitch ===
+
+pi $i, si 0
+@glitchloop
+
+pi $x, si 0, rnd $x
+pi $y, si 16, rnd $y
+pi $z, si 2, rnd $z
+pi $v, si 0, rnd $v
+x $x, y $y, z $z, s $v // GLITCH!!
+
+pi $i, add $1, seq $4, j @glitchloop
+
+// === jpg ===
+
+pi $r, rnd $0
+zi 4, jpg $r
+
+pi $_, si 10, w $_
+j @update

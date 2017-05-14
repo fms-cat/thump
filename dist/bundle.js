@@ -620,7 +620,7 @@ var Thump = function () {
       }
 
       thump.gifFrameCount++;
-      if (!thump.gifFrameCount === 0) {
+      if (thump.gifFrameCount === 0) {
         return;
       }
 

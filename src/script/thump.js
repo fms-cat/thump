@@ -109,7 +109,7 @@ let Thump = class {
     if ( !thump.gifRecording ) { return; }
 
     thump.gifFrameCount ++;
-    if ( !thump.gifFrameCount === 0 ) { return; }
+    if ( thump.gifFrameCount === 0 ) { return; }
 
     thump.gif.addFrame( canvas, { delay: 20, copy: true } );
 

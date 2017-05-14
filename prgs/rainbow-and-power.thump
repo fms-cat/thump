@@ -1,0 +1,94 @@
+#l 0 8 0 // bank0: https://i.imgur.com/AlVMWlX.png
+
+pi $0, si 0
+pi $1, si 1
+pi $2, si 2
+pi $4, si 4
+pi $8, si 8
+pi $16, si 16
+pi $32, si 32
+pi $64, si 64
+pi $85, si 85
+pi $100, si 100
+pi $128, si 128
+pi $160, si 160
+pi $170, si 170
+pi $192, si 192
+pi $255, si 255
+
+// ------
+
+pi $ix, si 0
+pi $iy, si 0
+@ptnloop
+x $ix, y $iy, zi 8, g $_
+pi $_x, s $ix, mul $1, sub $64, sin $_x
+pi $_y, s $iy, mul $1, sub $64, sin $_y, sub $64
+pi $_, s $_x, mul $_y
+x $ix, y $iy
+zi 9, s $_, div $8
+pi $ix, add $1, seq $0, j @ptnloop, si 0
+pi $iy, add $1, seq $0, j @ptnloop, si 0
+
+// ------
+
+pi $f, si 0
+@update
+
+// poker
+pi $_, si 0, pi $x, rnd $_
+pi $_, si 16, pi $y, rnd $_
+pi $z, si 1
+pi $_, si 0, pi $v, rnd $_
+x $x, y $y, z $z, s $v
+
+pi $ix, si 0
+pi $iy, si 0
+@catloop
+pi $_x, s $ix, add $4
+pi $_y, s $iy, add $4
+x $_x, y $_y, zi 8, g $len
+
+pi $f2, s $f, mul $2
+pi $len, sub $f2, mul $4
+pi $cr, s $len, sin $cr
+pi $cg, s $len, add $85, sin $cg
+pi $cb, s $len, add $170, sin $cb
+
+pi $ily, si 0
+@catloopy
+pi $y, s $iy, add $ily
+x $ix, y $y
+zi 4, s $cr, sf $8
+zi 5, s $cg, sf $8
+zi 6, s $cb, sf $8
+pi $ily, add $1, seq $8, j @catloopy, si 0
+
+pi $ix, add $8, seq $0, j @catloop, si 0
+pi $iy, add $8, seq $0, j @catloop, si 0
+
+// ------
+
+pi $i, si 0
+@srtloop
+y $i, zi 9, srt $1
+pi $i, add $1, seq $0, j @srtloop
+
+pi $_, si 9, zi 10, cp $_
+
+pi $i, si 2
+@triloop
+pi $_, s $i, div $2
+pi $x, si 128, sub $_
+pi $l, s $_, mul $2
+pi $y, s $i, add $32
+x $x, y $y, zi 10, s $0, sf $l
+pi $i, add $1, seq $160, j @triloop
+
+pi $_, si 10, zi 4, cp8 $_
+
+// ------
+
+w $1
+pi $f, add $1
+j @update // jump to @loop
