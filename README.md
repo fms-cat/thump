@@ -168,6 +168,40 @@ pi $iy, add $1 // $iy += 1
 j @beg // jump to @beg
 ```
 
+### Images
+
+Images can be loaded with a load macro at the beginning of the file:
+
+```
+# l 2 4 img/cat_big.png
+```
+
+This will load (l) `img/cat_big.png` in mode 2 to buffer 4.
+
+There are 2 modes:
+
+    1. Black/White (1) - This will only occupy 1 buffer
+    2. RGBA (2) - This will occupy 4 Buffers
+
+In this example we loaded the image into buffer 4(,5,6,7 - because of mode 2). 4,5,6,7 represent the visible RGBA buffer as we already learned and so this one liner will simply display your image :)
+
+You can load as many images as you want.
+
+```
+# l 1 4 img/cat_big.png
+# l 2 5 img/cat_small.png
+```
+
+This will load the big cat in monochrome mode. This will fill the red buffer (4) only.
+
+Then we are loading the small cat in RGBA mode but we load it into buffer 5. Essentially filling out 5(G) with the original red channel of the image, 6(B) with the original green channel, the original blue channel is now the alpha of our visible image and 7 is not visible but the buffer is filled and the data may be used :)
+
+To specify an image enter a URL. You can either specify a relative URL (like img/cat_big.png) or an absolute URL pointing anywhere. Furthermore when entering a number you are loading it from the imagebanks in the UI like so:
+
+```
+# l 1 4 0 // load bank 0 in b/w mode into buffer 4
+```
+
 ## Greetings
 
 Thump is made with great inspiration of [Brainf**k](https://esolangs.org/wiki/Brainfuck), [PICO-8](http://www.lexaloffle.com/pico-8.php), and [TIS-100](http://store.steampowered.com/app/370360/).
