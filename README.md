@@ -168,6 +168,49 @@ pi $iy, add $1 // $iy += 1
 j @beg // jump to @beg
 ```
 
+## Images
+
+(The section is originally written by @m0ppers . Thanks!)
+
+Images can be loaded with a load macro at the beginning of the file:
+
+```
+#l 2 4 img/cat_big.png
+// ^ ^ ^ image path
+// | | buffer
+// | mode
+```
+
+This will load `img/cat_big.png` in mode 2 into buffer 4.
+
+There are 3 modes:
+
+0. Grayscale (0) - This will only occupy 1 buffer
+1. 8bit color (1) - This will only occupy 1 buffer
+2. RGBA (2) - This will occupy 4 Buffers
+
+In this example we loaded the image into buffer 4(,5,6,7 - because of mode 2). Each buffer of 4,5,6 represent the visible buffer of R,G,B as we already learned and so this one liner will simply display your image :)
+
+You can load as many images as you want.
+
+```
+#l 0 4 img/cat_big.png // load img/cat_big.png in grayscale mode into buffer 4
+#l 2 5 img/cat_small.png // load img/cat_small.png in RGBA mode into buffer 5(,6,7,8)
+```
+
+This will load the big cat in monochrome mode. This will fill the red buffer (4) only.
+
+Then we are loading the small cat in RGBA mode but we load it into buffer 5. Essentially filling out 5(G) with the original red channel of the image, 6(B) with the original green channel, the original blue and alpha channel are not visible but the buffer is filled and the data may be used.
+
+Furthermore when entering a number you are loading it from the image banks in the UI like so:
+
+```
+#l 0 4 0 // load from image bank 0 in grayscale mode into buffer 4
+// ^ ^ ^ image bank number
+// | | buffer
+// | mode
+```
+
 ## Greetings
 
 Thump is made with great inspiration of [Brainf**k](https://esolangs.org/wiki/Brainfuck), [PICO-8](http://www.lexaloffle.com/pico-8.php), and [TIS-100](http://store.steampowered.com/app/370360/).
