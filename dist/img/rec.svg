@@ -1,0 +1,15 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 100 100"
+  width="256"
+  height="256"
+  font-family="Helvetica Neue"
+  font-weight="300"
+>
+  <path fill="#f06" stroke="#f06" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" d="
+    M 25 50
+    a 25 25 0 0 1 50 0
+    a 25 25 0 0 1 -50 0
+    z
+  " />
+</svg>

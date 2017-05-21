@@ -9,6 +9,7 @@ const watchify = require( "watchify" );
 const babelify = require( "babelify" );
 const sass = require( "gulp-sass" );
 const source = require( "vinyl-source-stream" );
+const vueify = require( "vueify" );
 
 const browserSync = require( "browser-sync" );
 
@@ -46,6 +47,7 @@ let brwsrfy = browserify( {
   fullPaths: true,
   entries: [ "./src/script/main.js" ],
   transform: [
+    vueify,
     [ babelify, {
       presets: "es2015"
     } ]

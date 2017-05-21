@@ -232,17 +232,11 @@ export default ( Thump, thump ) => {
   } );
 
   thump.def( "srt", ( param ) => { // sort
-    let index = ~~( thump.pointer() / 256 ) * 256;
-    for ( let ii = 0; ii < thump.get( param ); ii ++ ) {
-      for ( let i = 0; i < 255; i ++ ) {
-        let a = thump.buf[ index + i ];
-        let b = thump.buf[ index + i + 1 ];
-        if ( b < a ) {
-          thump.buf[ index + i + 1 ] = a;
-          thump.buf[ index + i ] = b;
-        }
-      }
-    }
+    let index = thump.pointer();
+
+    let len = thump.get( param ) || 256;
+    let arr = thump.buf.subarray( index, Math.min( index + len, thump.bufLen ) );
+    thump.buf.set( arr.sort(), index );
   } );
 
   thump.def( "gzr", ( param ) => { // set gzr
@@ -262,7 +256,7 @@ export default ( Thump, thump ) => {
   } );
 
   thump.def( "jpg", ( param ) => { // jpegize!!
-    thump.stopped = true;
+    thump.waitCallback = true;
 
     let z = thump.get( Thump.P_Z );
     let d = thump.bgContext.getImageData( 0, 0, 256, 256 );
@@ -289,7 +283,7 @@ export default ( Thump, thump ) => {
 
       URL.revokeObjectURL( url );
       i = null;
-      thump.stopped = false;
+      thump.waitCallback = false;
     };
     i.src = url;
 

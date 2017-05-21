@@ -1,0 +1,75 @@
+pi $0, si 0
+pi $1, si 1
+pi $2, si 2
+pi $3, si 3
+pi $4, si 4
+pi $8, si 8
+pi $13, si 13
+pi $15, si 15
+pi $16, si 16
+pi $17, si 17
+pi $20, si 20
+pi $200, si 200
+pi $255, si 255
+
+gzb $8
+
+// === init ===
+
+pi $x, s $0
+pi $y, s $1
+@init
+x $x, y $0, z $8, rnd $2, mul $255
+pi $x, add $1, seq $0, j @init
+
+// === update ===
+
+@update
+
+// === process automaton ===
+
+pi $c, s $0
+pi $yp, s $y, sub $1
+pi $ix, s $0
+pi $iy, s $0
+
+@cloop
+pi $_, s $x, sub $1, add $ix, mod $16
+pi $xt, s $x, div $16, sub $1, add $iy, mod $16, mul $16, add $_
+sne $x, j @skipadd
+
+x $xt, y $yp, z $8
+sne $0, j @skipadd, pi $c, add $1
+@skipadd
+
+pi $ix, add $1, seq $3, j @cloop, s $0
+pi $iy, add $1, seq $3, j @cloop, s $0
+
+pi $c, sne $3, j @c3
+pi $c, sne $2, j @c2
+x $x, y $y, z $8, s $0, j @ce
+@c3, x $x, y $y, z $8, s $255, j @ce
+@c2, x $x, y $yp, z $8, g $_, y $y, s $_, j @ce
+@ce
+
+pi $x, add $1, seq $0, j @update, s $0
+
+// === draw ===
+
+pi $i, s $0
+@draw
+
+pi $dx, s $i, mod $16, mul $16
+pi $dy, s $i, div $16, mul $16
+x $i, y $y, z $8, g $p
+
+pi $j, s $0
+@drawrect
+pi $_y, s $dy, add $j
+x $dx, y $_y, z $4, s $p, sf $15
+pi $j, add $1, seq $15, j @drawrect
+
+pi $i, add $1, seq $0, j @draw, s $0
+
+pi $y, add $1
+w $20, j @update

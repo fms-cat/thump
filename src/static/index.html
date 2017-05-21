@@ -3,36 +3,21 @@
 <meta charset="UTF-8">
 <title></title>
 
+<style>
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+
+  background: #202428;
+  color: #fff;
+}
+</style>
+
 <body>
-  <div id="container">
-    <canvas id="canvas"></canvas>
-    <div id="divConsole"></div>
-
-    <br />
-
-    <textarea id="textareaCode" cols=1 rows=1></textarea>
-
-    <br />
-    
-    <input id="buttonRun" type="button" value="Run" />
-    <input id="buttonRedice" type="button" value="Redice" />
-    <input id="buttonSave" type="button" value="GIF" />
-
-    <br />
-
-    <div id="divImageBank">
-      ImageBank0: <input id="imageBank0" type="file" /><br />
-      ImageBank1: <input id="imageBank1" type="file" /><br />
-      ImageBank2: <input id="imageBank2" type="file" /><br />
-      ImageBank3: <input id="imageBank3" type="file" /><br />
-      ImageBank4: <input id="imageBank4" type="file" /><br />
-      ImageBank5: <input id="imageBank5" type="file" /><br />
-      ImageBank6: <input id="imageBank6" type="file" /><br />
-      ImageBank7: <input id="imageBank7" type="file" /><br />
-    </div>
-  </div>
+  <div id="vue"></div>
 </body>
 
-<link rel="stylesheet" type="text/css" href="bundle.css">
 <script src="lib/gif.js"></script>
 <script src="bundle.js"></script>

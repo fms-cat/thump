@@ -51,12 +51,17 @@ let Thump = class {
 
     thump.funcs = [];
     thump.funcMap = {};
+    thump.funcMapR = [];
     require( "./thump-defs" ).default( Thump, thump );
 
     // ------
 
     thump.code = "v";
     thump.stopped = true;
+    thump.initCue = true;
+    thump.waitCallback = false;
+
+    thump.drawListeners = [];
 
     // ------
 
@@ -111,7 +116,7 @@ let Thump = class {
     thump.gifFrameCount ++;
     if ( thump.gifFrameCount === 0 ) { return; }
 
-    thump.gif.addFrame( canvas, { delay: 20, copy: true } );
+    thump.gif.addFrame( thump.canvas, { delay: 20, copy: true } );
 
     thump.context.globalAlpha = 0.5;
     thump.context.fillStyle = "#000";
@@ -121,7 +126,7 @@ let Thump = class {
     thump.context.globalAlpha = 1.0;
   }
 
-  saveGif( options ) {
+  __saveGif( options ) {
     let thump = this;
     if ( typeof GIF === "undefined" ) {
       console.error( "saveGif: gif.js seems not to be loaded. export aborted" );
@@ -158,20 +163,44 @@ let Thump = class {
     thump.stop();
   }
 
+  addDrawListener( listener ) {
+    let thump = this;
+    
+    thump.drawListeners.push( listener );
+  }
+
+  removeDrawListener( listener ) {
+    let thump = this;
+    
+    let index = thump.drawListeners.indexOf( listener );
+    if ( index !== -1 ) {
+      thump.drawListeners.splice( index, 1 );
+    }
+  }
+
   draw() {
     let thump = this;
+
     for ( let i = 0; i < 65536; i ++ ) {
       thump.imageData.data[ i * 4 + 0 ] = thump.get( thump.get( Thump.P_GZR ) * 65536 + i );
       thump.imageData.data[ i * 4 + 1 ] = thump.get( thump.get( Thump.P_GZG ) * 65536 + i );
       thump.imageData.data[ i * 4 + 2 ] = thump.get( thump.get( Thump.P_GZB ) * 65536 + i );
     }
     thump.context.putImageData( thump.imageData, 0, 0 );
+
     thump.saveGifFrame();
+
+    thump.drawListeners.map( listener => {
+      listener( thump );
+    } );
   }
 
   def( name, func ) {
     let thump = this;
-    thump.funcMap[ name ] = thump.funcs.length;
+
+    let index = thump.funcs.length;
+    thump.funcMap[ name ] = index;
+    thump.funcMapR[ index ] = name;
     thump.funcs.push( ( param ) => {
       // console.log( name, param );
       return func( param );
@@ -332,11 +361,21 @@ let Thump = class {
     thump.xorshift.gen( thump.seed );
   }
 
-  init() {
+  init( options ) {
     let thump = this;
 
-    thump.stopped = true;
-    thump.gifRecording = false;
+    thump.initCue = options || {};
+  }
+
+  __init( options ) {
+    let thump = this;
+
+    thump.stopped = false;
+    if ( options.gif ) {
+      thump.__saveGif( options.gif );
+    } else {
+      thump.gifRecording = false;
+    }
 
     thump.buf.fill( 0 );
 
@@ -356,8 +395,9 @@ let Thump = class {
 
     thump.xorshift.gen( thump.seed );
 
+    thump.waitCallback = true;
     thump.interpret( thump.code, () => {
-      thump.stopped = false;
+      thump.waitCallback = false;
     } );
 
     thump.context.fillStyle = "#000";
@@ -368,7 +408,10 @@ let Thump = class {
     let thump = this;
     let waited = false;
 
-    if ( !thump.stopped ) {
+    if ( thump.initCue ) {
+      thump.__init( thump.initCue );
+      thump.initCue = null;
+    } else if ( !thump.stopped && !thump.waitCallback ) {
       let b = +new Date();
       for ( let i = 0; i < 1E13; i ++ ) {
         if ( i % 1E3 === 0 ) {
